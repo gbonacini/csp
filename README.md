@@ -1,7 +1,7 @@
 Description:
 ============
 
-This tool parse Linux ELF executables checking if they was compiled wit the stack protector feature.
+This tool parse Linux ELF executables checking if they was compiled with the stack protector feature.
 
 Synopsis:
 =========
