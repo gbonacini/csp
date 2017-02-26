@@ -45,9 +45,9 @@ Installation:
   make
 
 - Start the program:<BR>
-  ./cspp  <efl_file> <BR>
+  ./cspp  elf_file <BR>
   or  <BR>
-  ./cspp [-v | -vv | -vvv ]    # Verbose output, if available
+  ./cspp [-v | -vv | -vvv ] elf_file   # Verbose output, if available
 
 - Online help:
 
