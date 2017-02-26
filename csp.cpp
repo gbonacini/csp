@@ -136,7 +136,7 @@ bool ElfPrs::checkSection(const string  sectionName, const string  symbolName) n
         }
     }
 
-    // if(ret) pdb(Verbosity::STD, "\n");
+    if(ret) pdb(Verbosity::STD, "\n");
     return ret;
 }
 
