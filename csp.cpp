@@ -97,10 +97,11 @@ ElfPrs::~ElfPrs(void){
 }
 
 bool ElfPrs::checkSection(const string  sectionName, const string  symbolName) noexcept(false){
-    bool       ret               = false;
+    bool       ret               = false,
+               symbFound         = false,
+               sectFound         = false;
     char       *section_name     = nullptr;
 
-    pdb(Verbosity::STD, "\nProcessing file: %s ", filename.c_str());
     while((scn = elf_nextscn(elf, scn))!= nullptr){
         if(gelf_getshdr(scn, &gshdr) != &gshdr)
              throw ElfPrsExp(string("Binary checking error - getshdr(): ") + elf_errmsg(-1));
@@ -112,13 +113,13 @@ bool ElfPrs::checkSection(const string  sectionName, const string  symbolName) n
         pdb(Verbosity::DEBUG, "Section: %s - %-4.4jd\n", 
                 section_name, static_cast<uintmax_t>(elf_ndxscn(scn)));
 
-        if(!strcmp(section_name, sectionName.c_str())) {
-            ret = (symbolName.empty() ? true : false);
-            pdb(Verbosity::STD, "- Found section: %s", sectionName.c_str());
+        if(!strcmp(section_name, sectionName.c_str())){
+            ret                     = (symbolName.empty() ? true : false);
+            sectFound               = true;
             Elf_Data *edata         = elf_getdata(scn, nullptr);
             int symbol_count        = gshdr.sh_size / gshdr.sh_entsize;
   
-            for(int i = 0; i < symbol_count; i++) {
+            for(int i = 0; i < symbol_count; i++){
                 GElf_Sym sym;                   
                 gelf_getsym(edata, i, &sym);
    
@@ -128,15 +129,24 @@ bool ElfPrs::checkSection(const string  sectionName, const string  symbolName) n
                            static_cast<unsigned int>(sym.st_value), 
                            static_cast<int>(sym.st_size));
                 if(!symbolName.empty() && !strcmp(symbolName.c_str(), thisSymb)){
-                    pdb(Verbosity::STD, " - found symbol: %s", symbolName.c_str());
-                    ret = true;
+                    ret            = true;
+                    symbFound      = true;
                 }
           }
           break;
         }
     }
 
-    if(ret) pdb(Verbosity::STD, "\n");
+    pdb(Verbosity::STD, "\nProcessing file: %s ", filename.c_str());
+
+    if(sectFound)               pdb(Verbosity::STD, "- Found section: %s", sectionName.c_str());
+    else                        pdb(Verbosity::STD, "- Section: %s - Not found", sectionName.c_str());
+
+    if(sectFound && symbFound)       pdb(Verbosity::STD, " - found symbol: %s", symbolName.c_str());
+    else if(sectFound && !symbFound) pdb(Verbosity::STD, " - symbol: %s - Not found", symbolName.c_str());
+
+    pdb(Verbosity::STD, "\n");
+
     return ret;
 }
 
