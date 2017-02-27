@@ -76,12 +76,10 @@ ElfPrs::ElfPrs(string fname, Verbosity  dbg) : filename{fname}, elfDebug{dbg}, e
     if(elf_version(EV_CURRENT) == EV_NONE)
           throw ElfPrsExp(string("ELF library init error: ") + elf_errmsg(-1));
 
-    fd     = open(filename.c_str(), O_RDONLY, 0);
-    if(fd < 0) 
+    if((fd     = open(filename.c_str(), O_RDONLY)) < 0) 
           throw ElfPrsExp(string("ELF library init error opening file: " + filename));
 
-    elf    = elf_begin(fd, ELF_C_READ, nullptr);
-    if(elf == nullptr) 
+    if((elf    = elf_begin(fd, ELF_C_READ, nullptr)) == nullptr) 
           throw ElfPrsExp(string("ELF library init error - elf_begin(): ") + elf_errmsg(-1));
 
     if(elf_kind(elf) != ELF_K_ELF)
@@ -123,7 +121,7 @@ bool ElfPrs::checkSection(const string  sectionName, const string  symbolName) n
                 GElf_Sym sym;                   
                 gelf_getsym(edata, i, &sym);
    
-                char *thisSymb = elf_strptr(elf, gshdr.sh_link, sym.st_name);
+                char *thisSymb      = elf_strptr(elf, gshdr.sh_link, sym.st_name);
    
                 pdb(Verbosity::DEBUG, "%s - item: %d - %08x %08d\n", thisSymb, i, 
                            static_cast<unsigned int>(sym.st_value), 
